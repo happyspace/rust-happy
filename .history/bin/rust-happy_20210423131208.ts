@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from '@aws-cdk/core';
-import { DevHappyStack } from '../lib/rust-happy-stack';
+import { DevHappyStack } from '../lib/dev-happy-stack';
 import { RustLambdaDevotedStack, RustLambdaDevotedStackProps} from '../lib/rust-lambda-devoted-error';
 import { S3Code } from '@aws-cdk/aws-lambda';
 

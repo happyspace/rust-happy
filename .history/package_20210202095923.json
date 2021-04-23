@@ -1,8 +1,8 @@
 {
-  "name": "rust-happy",
+  "name": "dev-happy",
   "version": "0.1.0",
   "bin": {
-    "dev-happy": "bin/rust-happy.js"
+    "dev-happy": "bin/dev-happy.js"
   },
   "scripts": {
     "build": "tsc",
