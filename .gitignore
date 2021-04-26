@@ -3,6 +3,7 @@
 *.d.ts
 node_modules
 .history
+target
 
 # CDK asset staging directory
 .cdk.staging

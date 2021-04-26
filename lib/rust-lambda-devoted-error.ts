@@ -44,7 +44,7 @@ export class RustLambdaDevotedStack extends cdk.Stack {
     new cdk.CfnOutput(this, "ddbTable", { value: this.tableImage.tableName });
 
     const rekFun = new lambda.Function(this, "rekognitionFunction", {
-      code: lambda.Code.fromAsset("rust_happy//echo.zip"),
+      code: lambda.Code.fromAsset("lambda//echo.zip"),
       runtime: Runtime.PROVIDED_AL2,
       handler: "doesnt.matter",
       timeout: Duration.seconds(30),
