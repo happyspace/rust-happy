@@ -7,7 +7,11 @@ We build out our cloud application infrastructure using CDK. Our backend code wi
 
 Follow directions to install the following for your host platform.
 
-* [Install Docker Desktop](https://www.docker.com/products/docker-desktop)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop)
+* [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+  * [aws configure](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html#cli-configure-quickstart-config)
+* [AWS CDK](https://docs.aws.amazon.com/cdk/latest/guide/getting_started.html)
+  * [Follow 'Prerequisites' to setup the CDK](https://github.com/aws-samples/aws-dev-hour-backend#prerequisites)
 
 ### Windows Users
 
@@ -22,18 +26,15 @@ If we would like to package our lambdas on the Windows side, use this utility to
 go.exe get -u github.com/aws/aws-lambda-go/cmd/build-lambda-zip
 ```
 
-## Lambdas
+#### Building nativity on Windows
 
-
-### rekognition
-
-### service
+TODO: install OpenSSL and build the Rust OpenSSL crate.
 
 ## Docker
 
 ### Build
 
-Build an image for building our lambdas based on the [official rust template for Alpine Linux](https://github.com/rust-lang/docker-rust). To this we add build-base, openssl-dev and git.
+Build an image for building our lambdas based on the [official Rust template for Alpine Linux](https://github.com/rust-lang/docker-rust). To this we add build-base, openssl-dev, git and zip.
 
 ```pwsh
 
@@ -60,7 +61,7 @@ cargo build --bin rekognition --release --target x86_64-unknown-linux-musl
 For custom AWS lambda runtimes, we follow the convention [described in the docs](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html):
 
 * Include a runtime 'in the form of an executable file named *bootstrap*'
-* Our lambda function, in our case compiled into our runtime *bootstrap*
+* A lambda function, in our case compiled into our runtime *bootstrap*
 
 We will package our lambda functions in .zip archives for deployment through AWS CDK.
 
@@ -75,10 +76,12 @@ cp ./target/x86_64-unknown-linux-musl/release/rekognition ./bootstrap && zip rek
 > #### Note to Windows Users
 >
 > Our *bootstrap* file must be executable, which will not be preserved
-> creating the '.zip' file in Windows context. For 
+> creating the '.zip' file in Windows context. Use the 'build-lambda-zip utility to create a zip file that does preserved the executable status of our *bootstrap* file.
 >
 > ```pwsh
-> ~\Go\Bin\build-lambda-zip.exe -output echo.zip bootstrap
+> cp ./target/x86_64-unknown-linux-musl/release/rekognition ./bootstrap
+> ~\Go\Bin\build-lambda-zip.exe -output rekognition.zip bootstrap
+> mv --force rekognition.zip ./lambda/ && rm bootstrap
 > ```
 >
 

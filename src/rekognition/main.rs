@@ -6,11 +6,17 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use simple_logger::SimpleLogger;
 
+#[allow(unused_imports)]
+use rusoto_core::Region;
+#[allow(unused_imports)]
+use rusoto_s3::{S3, S3Client, ListObjectsRequest};
+
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    println!("Hello, world!");
+    println!("Rust Happy!");
 
-        // The runtime logging can be enabled here by initializing `log` with `simple_logger`
+    // The runtime logging can be enabled here by initializing `log` with `simple_logger`
     // or another compatible crate. The runtime is using `tracing` internally.
     // You can comment out the `simple_logger` init line and uncomment the following block to
     // use `tracing` in the handler function.
