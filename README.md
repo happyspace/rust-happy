@@ -7,14 +7,17 @@ We build out our cloud application infrastructure using CDK. Our backend code wi
 
 Follow directions to install the following for your host platform.
 
-* [Instal Docker Desktop](https://www.docker.com/products/docker-desktop)
+* [Install Docker Desktop](https://www.docker.com/products/docker-desktop)
 
-**Windows Users**
+### Windows Users
 
-* [build-lambda-zip][gozip]  
+If we would like to package our lambdas on the Windows side, use this utility to create the zip file correctly.
+
+* [build-lambda-zip](#get-build-lambda-zip)  
   * [Go](https://golang.org/doc/install)
 
-[gozip]: 
+#### Get build-lambda-zip
+
 ```pwsh
 go.exe get -u github.com/aws/aws-lambda-go/cmd/build-lambda-zip
 ```
@@ -30,7 +33,7 @@ go.exe get -u github.com/aws/aws-lambda-go/cmd/build-lambda-zip
 
 ### Build
 
-Build an image for building our lambdas based on the [official template for Alpine Linux](https://github.com/rust-lang/docker-rust). To this we add build-base, openssl-dev and git.
+Build an image for building our lambdas based on the [official rust template for Alpine Linux](https://github.com/rust-lang/docker-rust). To this we add build-base, openssl-dev and git.
 
 ```pwsh
 
@@ -61,33 +64,55 @@ For custom AWS lambda runtimes, we follow the convention [described in the docs]
 
 We will package our lambda functions in .zip archives for deployment through AWS CDK.
 
+#### Package lambda interactively in our container
 
-> **Note to Windows Users**
+```sh
+cp ./target/x86_64-unknown-linux-musl/release/rekognition ./bootstrap && zip rekognition.zip bootstrap && rm bootstrap && mv -f rekognition.zip ./lambda/
+
+
+```
+
+> #### Note to Windows Users
 >
 > Our *bootstrap* file must be executable, which will not be preserved
-> creating the '.zip' file in Windows. For 
+> creating the '.zip' file in Windows context. For 
+>
 > ```pwsh
 > ~\Go\Bin\build-lambda-zip.exe -output echo.zip bootstrap
 > ```
-> 
-
+>
 
 ```sh
 
 ```
 
-## CDK
+## CDK: how we will manage our lambda code
+
+Once we have created our build context in Docker, built and packaged our lambda functions: we are ready to deploy the code through AWS CDK.
+
+
+
+```pwsh
+cdk synth
+cdk deploy
+
+```
+
+## AWS Rust Happy Stack
+
+
+
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ### Useful commands
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+* `npm run build`   compile typescript to js
+* `npm run watch`   watch for changes and compile
+* `npm run test`    perform the jest unit tests
+* `cdk deploy`      deploy this stack to your default AWS account/region
+* `cdk diff`        compare deployed stack with current state
+* `cdk synth`       emits the synthesized CloudFormation template
 
 ## Rust
 

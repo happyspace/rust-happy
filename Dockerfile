@@ -6,6 +6,7 @@ RUN   apk add --no-cache \
   build-base \
   openssl-dev \
   git \
+  zip \
   ; 
 
 ENV RUSTUP_HOME=/usr/local/rustup \

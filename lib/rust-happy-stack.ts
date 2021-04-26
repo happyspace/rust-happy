@@ -1,41 +1,72 @@
-import * as cdk from '@aws-cdk/core';
-
-import * as s3  from '@aws-cdk/aws-s3';
+import * as cdk from "@aws-cdk/core";
+import * as s3 from "@aws-cdk/aws-s3";
 import * as lambda from "@aws-cdk/aws-lambda";
 import * as dynamodb from "@aws-cdk/aws-dynamodb";
-import { Duration  } from "@aws-cdk/core";
+import { Runtime } from "@aws-cdk/aws-lambda";
+import { Duration } from "@aws-cdk/core";
 import * as iam from "@aws-cdk/aws-iam";
 import * as event_sources from "@aws-cdk/aws-lambda-event-sources";
-import { Runtime } from '@aws-cdk/aws-lambda';
-import { Effect } from '@aws-cdk/aws-iam';
 
-import * as path from 'path';
+export interface RustHappyStackProps extends cdk.StackProps {
+  bucket: s3.Bucket;
+  table: dynamodb.Table;
+}
 
-const imageBucketName = "cdk-rekn-imagebucket"
+const imageBucketName = "rust-happy-rekn-imagebucket";
 
-export class DevHappyStack extends cdk.Stack {
-  public readonly imageBucket: s3.Bucket;
-  public readonly imageTable: dynamodb.Table;
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+export class RustHappyStack extends cdk.Stack {
+  public readonly bucketImage: s3.Bucket;
+  public readonly tableImage: dynamodb.Table;
+  constructor(
+    scope: cdk.Construct,
+    id: string,
+    props?: RustHappyStackProps
+  ) {
     super(scope, id, props);
 
     // =====================================================================================
     // Image Bucket
     // =====================================================================================
-    this.imageBucket = new s3.Bucket(this, imageBucketName, {
-      removalPolicy: cdk.RemovalPolicy.DESTROY
+    this.bucketImage = new s3.Bucket(this, imageBucketName, {
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, 'imageBucket', { value: this.imageBucket.bucketName });
-
+    new cdk.CfnOutput(this, "imageBucket", {
+      value: this.bucketImage.bucketName,
+    });
 
     // =====================================================================================
     // Amazon DynamoDB table for storing image labels
     // =====================================================================================
-    this.imageTable = new dynamodb.Table(this, 'ImageLabels', {
-      partitionKey: { name: 'image', type: dynamodb.AttributeType.STRING },
-      removalPolicy: cdk.RemovalPolicy.DESTROY
+    this.tableImage = new dynamodb.Table(this, "ImageLabels", {
+      partitionKey: { name: "image", type: dynamodb.AttributeType.STRING },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    new cdk.CfnOutput(this, 'ddbTable', { value: this.imageTable.tableName });
+    new cdk.CfnOutput(this, "ddbTable", { value: this.tableImage.tableName });
 
+    const rekFun = new lambda.Function(this, "rekognitionFunction", {
+      code: lambda.Code.fromAsset("lambda//rekognition.zip"),
+      runtime: Runtime.PROVIDED_AL2,
+      handler: "doesnt.matter",
+      timeout: Duration.seconds(30),
+      memorySize: 1024,
+      environment: {
+        "TABLE": this.tableImage.tableName,
+        "BUCKET": this.bucketImage.bucketName,
+        RUST_BACKTRACE: "1",
+      },
+    });
+
+    rekFun.addEventSource(new event_sources.S3EventSource(this.bucketImage, { events: [ s3.EventType.OBJECT_CREATED ]}));
+
+    this.bucketImage.grantRead(rekFun);
+    this.tableImage.grantWriteData(rekFun);
+
+    rekFun.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["rekognition:DetectLabels"],
+        resources: ["*"],
+      })
+    );
   }
 }
