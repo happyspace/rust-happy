@@ -43,7 +43,7 @@ export class RustHappyStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, "ddbTable", { value: this.tableImage.tableName });
 
-    const rekFun = new lambda.Function(this, "rekognitionFunction", {
+    const rekognitionFunction = new lambda.Function(this, "rekognitionFunction", {
       code: lambda.Code.fromAsset("lambda//rekognition.zip"),
       runtime: Runtime.PROVIDED_AL2,
       handler: "doesnt.matter",
@@ -52,16 +52,18 @@ export class RustHappyStack extends cdk.Stack {
       environment: {
         "TABLE": this.tableImage.tableName,
         "BUCKET": this.bucketImage.bucketName,
+        // Rust AWS Rosoto client reads AWS_REGION by convention.
+        // "AWS_REGION": this.region,
         RUST_BACKTRACE: "1",
       },
     });
 
-    rekFun.addEventSource(new event_sources.S3EventSource(this.bucketImage, { events: [ s3.EventType.OBJECT_CREATED ]}));
+    rekognitionFunction.addEventSource(new event_sources.S3EventSource(this.bucketImage, { events: [ s3.EventType.OBJECT_CREATED ]}));
 
-    this.bucketImage.grantRead(rekFun);
-    this.tableImage.grantWriteData(rekFun);
+    this.bucketImage.grantRead(rekognitionFunction);
+    this.tableImage.grantWriteData(rekognitionFunction);
 
-    rekFun.addToRolePolicy(
+    rekognitionFunction.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["rekognition:DetectLabels"],

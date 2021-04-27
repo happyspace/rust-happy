@@ -30,6 +30,10 @@ go.exe get -u github.com/aws/aws-lambda-go/cmd/build-lambda-zip
 
 TODO: install OpenSSL and build the Rust OpenSSL crate.
 
+#### Visual Studio Code -- Standard Rust Container
+
+TODO: Explore using Visual Studio Code Standard Rust Container
+
 ## Docker
 
 ### Build
@@ -81,7 +85,7 @@ cp ./target/x86_64-unknown-linux-musl/release/rekognition ./bootstrap && zip rek
 > ```pwsh
 > cp ./target/x86_64-unknown-linux-musl/release/rekognition ./bootstrap
 > ~\Go\Bin\build-lambda-zip.exe -output rekognition.zip bootstrap
-> mv --force rekognition.zip ./lambda/ && rm bootstrap
+> mv -force rekognition.zip ./lambda/ && rm bootstrap
 > ```
 >
 
