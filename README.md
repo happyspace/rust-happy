@@ -97,15 +97,33 @@ cp ./target/x86_64-unknown-linux-musl/release/rekognition ./bootstrap && zip rek
 
 Once we have created our build context in Docker, built and packaged our lambda functions: we are ready to deploy the code through AWS CDK.
 
-
-
 ```pwsh
 cdk synth
 cdk deploy
 
 ```
 
-## AWS Rust Happy Stack
+### CDK configuration for Rust lambdas
+
+'runtime: Runtime.PROVIDED_AL2,' tells cloud formation that we are providing the runtime and that this runtime should run on Amazon Linux 2 (the 'AL2' suffix).
+
+```typescript
+
+    const rekognitionFunction = new lambda.Function(this, "rekognitionFunction", {
+      code: lambda.Code.fromAsset("lambda//rekognition.zip"),
+      runtime: Runtime.PROVIDED_AL2,
+      handler: "doesnt.matter",
+      timeout: Duration.seconds(30),
+      memorySize: 1024,
+      environment: {
+        "TABLE": this.tableImage.tableName,
+        "BUCKET": this.bucketImage.bucketName,
+        RUST_BACKTRACE: "1",
+      },
+    });
+
+
+```
 
 
 
@@ -123,5 +141,16 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ## Rust
 
+### Rusoto cargo configuration
 
+For our Rusoto clients it is important to enable the use of 'rustls' which removes a dependence on openssl for crypto functions.  
+
+```toml
+
+rusoto_core = {version = "0.46.0", default_features = false, features=["rustls"]}
+rusoto_s3 = {version = "0.46.0", default_features = false, features=["rustls"]}
+rusoto_sqs = {version = "0.46.0", default_features = false, features=["rustls"]}
+rusoto_dynamodb = {version = "0.46.0", default_features = false, features=["rustls"]}
+
+```
 
