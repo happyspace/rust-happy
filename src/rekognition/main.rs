@@ -60,7 +60,14 @@ pub(crate) async fn my_handler_function(event: Value, _ctx: Context) -> Result<V
 {
     log::info!("event: {}", serde_json::json!(event));
 
-    match S3_CLIENT.list_buckets().await {
+    let _bucket_name = env::var("BUCKET").unwrap();
+    let _list_obj_req = ListObjectsRequest{
+        bucket: _bucket_name,
+        ..Default::default()
+    };
+
+
+    match S3_CLIENT.list_objects(_list_obj_req).await {
         Err(e) => log::info!("Error listing buckets: {}", e),
         Ok(buckets) => log::info!("Buckets found: {:?}", buckets),
     };

@@ -52,8 +52,6 @@ export class RustHappyStack extends cdk.Stack {
       environment: {
         "TABLE": this.tableImage.tableName,
         "BUCKET": this.bucketImage.bucketName,
-        // Rust AWS Rosoto client reads AWS_REGION by convention.
-        // "AWS_REGION": this.region,
         RUST_BACKTRACE: "1",
       },
     });
