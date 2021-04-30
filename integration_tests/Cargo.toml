@@ -1,0 +1,22 @@
+[package]
+name = "integration_tests"
+version = "0.1.0"
+authors = ["happyspace <happyspace@gmail.com>"]
+edition = "2018"
+
+[[test]]
+name = "integration_tests_tests"
+path = "tests/lib.rs"
+
+
+[dependencies]
+tokio = { version = "1.0", features = ["macros", "io-util", "sync", "rt-multi-thread"] }
+rust_happy= {path = "../rust_happy"}
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "^1"
+
+rusoto_core = {version = "0.46.0", default_features = false, features=["rustls"]}
+rusoto_s3 = {version = "0.46.0", default_features = false, features=["rustls"]}
+rusoto_sqs = {version = "0.46.0", default_features = false, features=["rustls"]}
+rusoto_dynamodb = {version = "0.46.0", default_features = false, features=["rustls"]}

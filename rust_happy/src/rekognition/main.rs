@@ -15,6 +15,11 @@ use lazy_static::lazy_static;
 #[allow(unused_imports)]
 use std::env;
 
+use rust_happy::rekognition::{S3ClientContext, rekognition_function};
+
+// use crate::moo::S3ClientContext;
+// use moo::rekognition_function;
+
 
 lazy_static! {
      static ref S3_CLIENT: S3Client = {
@@ -48,6 +53,7 @@ async fn main() -> Result<(), Error> {
         .init();
     */
 
+
     // call the actual handler of the request
     let func = handler_fn(my_handler_function);
     lambda_runtime::run(func).await?;
@@ -56,21 +62,17 @@ async fn main() -> Result<(), Error> {
 }
 
 /// The actual handler of the Lambda request.
-pub(crate) async fn my_handler_function(event: Value, _ctx: Context) -> Result<Value, Error>
+pub(crate) async fn my_handler_function(_event: Value, _ctx: Context) -> Result<Value, Error>
 {
-    log::info!("event: {}", serde_json::json!(event));
+    log::info!("event: {}", serde_json::json!(_event));
 
-    let _bucket_name = env::var("BUCKET").unwrap();
-    let _list_obj_req = ListObjectsRequest{
-        bucket: _bucket_name,
-        ..Default::default()
-    };
-
-
-    match S3_CLIENT.list_objects(_list_obj_req).await {
-        Err(e) => log::info!("Error listing buckets: {}", e),
-        Ok(buckets) => log::info!("Buckets found: {:?}", buckets),
-    };
+    let bucket_name = env::var("BUCKET").unwrap();
+    //let s3c:S3Client = S3_CLIENT;
     
-    return Ok(event);
+    let client_ctx  = S3ClientContext { 
+        client: &*S3_CLIENT, 
+        bucket_name: bucket_name};
+
+    return rekognition_function(&_event, client_ctx).await;// let _client_Ctx: rust_happy::S3ClientContext = {}
+    
 }
